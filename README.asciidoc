@@ -15,5 +15,5 @@ WARNING - this is a work in progress project which does not work normally yet.
  * Notification is deleted when main page is opened
 
 
-
+image::https://github.com/rizsi/ServerMonitor/blob/master/ServerMonitor/Screenshot_2019-08-01.png[ServerMonitor,459,820]
 
