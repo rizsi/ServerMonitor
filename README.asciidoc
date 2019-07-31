@@ -2,3 +2,18 @@
 Simple Android application to constantly monitor the status of your server and notify you if there is a problem.
 
 WARNING - this is a work in progress project which does not work normally yet.
+
+== What works
+
+ * Set up a URL to monitor
+ * The URL must return a JSON like this: {"date":"2019-07-19 14:02:06.429","timestamp":1563544926429,"status":"OK"}
+ ** status - self diagnose - OK is the only allowed value
+ ** timestamp - System.currentTimeMillis() format timestamp of latest status update
+ ** date - user readable version of the latest status update
+ * Data is reloaded periodically by a background installed task
+ * If there is a change in the current status a notification is created (even if status goes from error -> OK)
+ * Notification is deleted when main page is opened
+
+
+
+
