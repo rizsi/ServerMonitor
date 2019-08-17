@@ -180,7 +180,7 @@ public class AlarmReceiver extends BroadcastReceiver
 
         // Get the AlarmManager service
         AlarmManager am = (AlarmManager) context.getSystemService(context.ALARM_SERVICE);
-        am.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime()+5000, sender);
+        am.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime()+60000, sender);
 //        am.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, 10000, 10000, sender);
     }
 }

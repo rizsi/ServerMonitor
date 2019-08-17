@@ -14,9 +14,11 @@ public class AddServerActivity extends AppCompatActivity {
 
     public static final String resultKey="serverEntry";
     public static final String resultDeleteIndex="serverDeleteEntry";
+    public static final String resultDuplicateIndex="serverDuplicateEntry";
     EditText editUrl;
     Button create;
     Button delete;
+    Button duplicate;
     int index;
 
     @Override
@@ -26,9 +28,11 @@ public class AddServerActivity extends AppCompatActivity {
         editUrl = (EditText) findViewById(R.id.editUrl);
         create = (Button) findViewById(R.id.buttonCreate);
         delete = (Button) findViewById(R.id.buttonDelete);
+        duplicate = (Button) findViewById(R.id.buttonDuplicate);
         // Step 5: Get the Bundle from the Intent that started this Activity
         delete.setVisibility(View.GONE);
         create.setText("Create server entry...");
+        duplicate.setVisibility(View.GONE);
         Bundle extras = getIntent().getExtras();
         index=-1;
         if (extras != null) {
@@ -40,6 +44,7 @@ public class AddServerActivity extends AppCompatActivity {
                 editUrl.setText(se.url);
                 delete.setVisibility(View.VISIBLE);
                 create.setText("Update server entry...");
+                duplicate.setVisibility(View.VISIBLE);
             }
         }
     }
@@ -54,6 +59,12 @@ public class AddServerActivity extends AppCompatActivity {
     public void deleteEntryButton(View view) {
         Intent intent = new Intent();
         intent.putExtra(resultDeleteIndex, index);
+        setResult(RESULT_OK, intent);
+        finish();
+    }
+    public void duplicateEntry(View view) {
+        Intent intent = new Intent();
+        intent.putExtra(resultDuplicateIndex, index);
         setResult(RESULT_OK, intent);
         finish();
     }

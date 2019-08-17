@@ -30,12 +30,13 @@ public class DataModel {
     public void reload(Context c) {
         servers.clear();
         try {
-            Log.d("DATA",  "Loading data model!");
+            Log.d("DATA",  "Loading data model!!");
             InputStream is=c.openFileInput(settingsFile);
             try {
                 Reader r = new InputStreamReader(is, "UTF-8");
                 BufferedReader br = new BufferedReader(r);
                 String line;
+                int index=0;
                 while((line=br.readLine())!=null)
                 {
                     String status="";
@@ -46,8 +47,10 @@ public class DataModel {
                         line=line.substring(0, separator);
                     }
                     ServerEntry se=new ServerEntry(line, status);
+                    se.index=index;
                     Log.d("DATA",  "Loading data model: "+se.url);
                     instance.add(se);
+                    index++;
                 }
             } finally {
                 is.close();
@@ -62,8 +65,15 @@ public class DataModel {
     public void add(ServerEntry serverEntry)
     {
         servers.add(serverEntry);
+        serverEntry.index=servers.size()-1;
     }
     public void deleteByIndex(int index){servers.remove(index);}
+    public void duplicateByIndex(int index){
+        ServerEntry toDuplicate=servers.get(index);
+        ServerEntry toadd=toDuplicate.cloneForDuplicate();
+        servers.add(toadd);
+        toadd.index=servers.size()-1;
+    }
     public void updateEntry(ServerEntry updatedServerEntry){
         Log.d("DATA", "Update entry: "+updatedServerEntry.index+" "+updatedServerEntry.url+" "+updatedServerEntry.status);
         servers.set(updatedServerEntry.index, updatedServerEntry);

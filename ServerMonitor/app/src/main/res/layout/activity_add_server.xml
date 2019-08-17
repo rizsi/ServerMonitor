@@ -9,7 +9,9 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="38dp">
 
         <EditText
             android:id="@+id/editUrl"
@@ -32,6 +34,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_weight="5"
             android:orientation="horizontal">
 
             <Button
@@ -50,6 +53,21 @@
                 android:layout_weight="1"
                 android:onClick="deleteEntryButton"
                 android:text="Delete entry" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="5"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/buttonDuplicate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:onClick="duplicateEntry"
+                android:text="Duplicate Entry" />
         </LinearLayout>
 
     </LinearLayout>

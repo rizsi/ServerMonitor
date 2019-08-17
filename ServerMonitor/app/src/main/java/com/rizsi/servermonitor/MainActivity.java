@@ -26,7 +26,7 @@ import static com.rizsi.servermonitor.R.layout.activity_main;
 public class MainActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     public RequestQueue queue;
-    private Button toggleServiceButton;
+//    private Button toggleServiceButton;
 
     volatile public static MainActivity current;
 
@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
         queue = Volley.newRequestQueue(this);
         setContentView(activity_main);
         recyclerView = (RecyclerView) findViewById(R.id.list);
-        toggleServiceButton =(Button) findViewById(R.id.toggleService);
+//        toggleServiceButton =(Button) findViewById(R.id.toggleService);
 
         // use this setting to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
@@ -65,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
         MyListAdapter mAdapter = new MyListAdapter(this, dataModel);
         recyclerView.setAdapter(mAdapter);
         AlarmReceiver.setAlarm(getApplicationContext());
-        updateToggleServiceButtonLabel();
+//        updateToggleServiceButtonLabel();
         BootReceiver.deleteNotification(getApplicationContext());
         current=this;
         this.registerReceiver(mMessageReceiver, new IntentFilter(intentId));
@@ -88,10 +88,10 @@ public class MainActivity extends AppCompatActivity {
 //        MonitorService.startPeriodic(getApplicationContext());
  //       MonitorService2.reschedule(getApplicationContext());
         AlarmReceiver.setAlarm(getApplicationContext());
-        updateToggleServiceButtonLabel();
+//        updateToggleServiceButtonLabel();
     }
 
-    private void updateToggleServiceButtonLabel() {
+/*    private void updateToggleServiceButtonLabel() {
         JobScheduler jobScheduler = (JobScheduler)getApplicationContext()
                 .getSystemService(JOB_SCHEDULER_SERVICE);
         if(jobScheduler.getAllPendingJobs().size()==0)
@@ -102,6 +102,7 @@ public class MainActivity extends AppCompatActivity {
             toggleServiceButton.setText("Stop background service");
         }
     }
+    */
 
     public void addServerButton(View view) {
         startActivityForResult(new Intent(this, AddServerActivity.class), 1);
@@ -127,6 +128,14 @@ public class MainActivity extends AppCompatActivity {
                     dm.deleteByIndex(deleteIndex);
                     dm.saveSettings(getApplicationContext());
                     Log.d("MAIN", "Edit returned delete "+deleteIndex);
+                }
+                int duplicateIndex = data.getIntExtra(AddServerActivity.resultDuplicateIndex, -1);
+                if(duplicateIndex>=0)
+                {
+                    DataModel dm=DataModel.getInstance(getApplicationContext());
+                    dm.duplicateByIndex(duplicateIndex);
+                    dm.saveSettings(getApplicationContext());
+                    Log.d("MAIN", "Edit returned duplicate "+deleteIndex);
                 }
                 ServerEntry updatedServerEntry= (ServerEntry)data.getSerializableExtra(AddServerActivity.resultKey);
                 if(updatedServerEntry!=null)
