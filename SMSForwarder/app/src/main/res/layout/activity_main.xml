@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="SMS forwarder setup"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout
+        android:layout_width="405dp"
+        android:layout_height="336dp"
+        android:orientation="vertical"
+        tools:layout_editor_absoluteX="-2dp"
+        tools:layout_editor_absoluteY="8dp">
+
+        <Button
+            android:id="@+id/buttonRequirePermissions"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onRequirePermissions"
+            android:text="Require rights" />
+
+        <Button
+            android:id="@+id/buttonSendSMS"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onSendSMS"
+            android:text="Send test SMS" />
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Source:" />
+
+        <EditText
+            android:id="@+id/sourceToForward"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="Source to forward"
+            android:inputType="phone" />
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Target:" />
+
+        <EditText
+            android:id="@+id/targetPhone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="Target number"
+            android:inputType="phone" />
+
+        <CheckBox
+            android:id="@+id/checkBoxShowAllSMSNumber"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Show all SMS number" />
+
+    </LinearLayout>
+
+</android.support.constraint.ConstraintLayout>
