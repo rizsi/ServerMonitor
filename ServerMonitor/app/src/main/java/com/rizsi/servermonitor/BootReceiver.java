@@ -33,12 +33,11 @@ public class BootReceiver extends BroadcastReceiver {
         // Toast.makeText(this, "Alarm Set", Toast.LENGTH_SHORT).show();
 
 
-        createNotificationChannel(context);
 
         AlarmReceiver.setAlarm(context);
     }
     public static final String CHANNEL_ID="ServerMonitor";
-    private void createNotificationChannel(Context context) {
+    private static void createNotificationChannel(Context context) {
         // Create the NotificationChannel, but only on API 26+ because
         // the NotificationChannel class is new and not in the support library
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -56,6 +55,7 @@ public class BootReceiver extends BroadcastReceiver {
 
     public static void sendNotification(Context context, String text)
     {
+        createNotificationChannel(context);
         NotificationCompat.Builder builder = new NotificationCompat.Builder( context, CHANNEL_ID)
                 .setSmallIcon(R.drawable.notification_icon)
                 .setContentTitle("ServerMonitor notification")

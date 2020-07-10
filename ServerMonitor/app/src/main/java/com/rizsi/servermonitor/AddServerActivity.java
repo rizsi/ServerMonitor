@@ -62,6 +62,10 @@ public class AddServerActivity extends AppCompatActivity {
         setResult(RESULT_OK, intent);
         finish();
     }
+    public void debugAction(View view)
+    {
+        BootReceiver.sendNotification(this, "Debug notification");
+    }
     public void duplicateEntry(View view) {
         Intent intent = new Intent();
         intent.putExtra(resultDuplicateIndex, index);

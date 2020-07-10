@@ -34,6 +34,10 @@ import java.io.Writer;
 public class MainActivity extends AppCompatActivity {
 
     public static final String keySourceToForward="source.txt";
+    public static final String keySourceToForward2="source2.txt";
+    public static final String keySourceToForward3="source3.txt";
+    public static final String keySourceToForward4="source4.txt";
+    public static final String keySourceToForward5="source5.txt";
     public static final String keyTargetPhone="target.txt";
     public static final String keyShowAll="showall.txt";
     @Override
@@ -51,22 +55,11 @@ public class MainActivity extends AppCompatActivity {
                 saveKey(MainActivity.this, keyShowAll, ""+isChecked);
             }
         });
-        EditText sourceToForward = (EditText)findViewById(R.id.sourceToForward);
-        sourceToForward.setText(loadKey(this, keySourceToForward));
-        sourceToForward.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void afterTextChanged(Editable s) {}
-            @Override
-            public void beforeTextChanged(CharSequence s, int start,
-                                          int count, int after) {
-            }
-            @Override
-            public void onTextChanged(CharSequence s, int start,
-                                      int before, int count) {
-                saveKey(MainActivity.this, keySourceToForward, s.toString());
-//                Toast.makeText(MainActivity.this, s, Toast.LENGTH_SHORT).show();
-            }
-        });
+        initEditText(R.id.sourceToForward, keySourceToForward);
+        initEditText(R.id.sourceToForward2, keySourceToForward2);
+        initEditText(R.id.sourceToForward3, keySourceToForward3);
+        initEditText(R.id.sourceToForward4, keySourceToForward4);
+        initEditText(R.id.sourceToForward5, keySourceToForward5);
         EditText targetPhone = (EditText)findViewById(R.id.targetPhone);
         targetPhone.setText(loadKey(this, keyTargetPhone));
         targetPhone.addTextChangedListener(new TextWatcher() {
@@ -84,6 +77,26 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
+    private void initEditText(int id, final String key) {
+        EditText sourceToForward = (EditText)findViewById(id);
+        sourceToForward.setText(loadKey(this, key));
+        sourceToForward.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void afterTextChanged(Editable s) {}
+            @Override
+            public void beforeTextChanged(CharSequence s, int start,
+                                          int count, int after) {
+            }
+            @Override
+            public void onTextChanged(CharSequence s, int start,
+                                      int before, int count) {
+                saveKey(MainActivity.this, key, s.toString());
+//                Toast.makeText(MainActivity.this, s, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
     public void onRequirePermissions(View v) {
 //        Toast.makeText(this, "HELLO!", Toast.LENGTH_SHORT).show();
         askPermission(Manifest.permission.RECEIVE_SMS);
@@ -119,17 +132,23 @@ public class MainActivity extends AppCompatActivity {
         }
     }
     public static void smsReceived(Context c,String sender, String message) {
-        String sourceToForward=loadKey(c, keySourceToForward);
+        String[] sources=new String[]{keySourceToForward, keySourceToForward2, keySourceToForward3, keySourceToForward4, keySourceToForward5};
+        String sourceToForwardFound=null;
+        for(String s: sources)
+        {
+            String sourceToForward=loadKey(c, s);
+            if(sourceToForward.length()>0 && sender.equals(sourceToForward))
+            {
+                sourceToForwardFound=sourceToForward;
+            }
+        }
         if("true".equals(loadKey(c, keyShowAll)))
         {
-            Toast.makeText(c, "SMS from: "+sender+"\n"+"SMSFilter: "+sourceToForward, Toast.LENGTH_SHORT).show();
+            Toast.makeText(c, "SMS from: "+sender+"\n"+(sourceToForwardFound==null?"MATCHES":"no match"), Toast.LENGTH_SHORT).show();
         }
-        if(sourceToForward.length()>0)
+        if(sourceToForwardFound!=null)
         {
-            if(sender.equals(sourceToForward))
-            {
-                sendSms(c, message);
-            }
+            sendSms(c, message);
         }
     }
 
