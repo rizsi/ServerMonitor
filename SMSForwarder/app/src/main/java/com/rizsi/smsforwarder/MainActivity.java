@@ -22,6 +22,18 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.RetryPolicy;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -30,6 +42,8 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -38,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String keySourceToForward3="source3.txt";
     public static final String keySourceToForward4="source4.txt";
     public static final String keySourceToForward5="source5.txt";
+    public static final String keyTargetHttps="targetHttps.txt";
     public static final String keyTargetPhone="target.txt";
     public static final String keyShowAll="showall.txt";
     @Override
@@ -60,6 +75,7 @@ public class MainActivity extends AppCompatActivity {
         initEditText(R.id.sourceToForward3, keySourceToForward3);
         initEditText(R.id.sourceToForward4, keySourceToForward4);
         initEditText(R.id.sourceToForward5, keySourceToForward5);
+        initEditText(R.id.targetHttps, keyTargetHttps);
         EditText targetPhone = (EditText)findViewById(R.id.targetPhone);
         targetPhone.setText(loadKey(this, keyTargetPhone));
         targetPhone.addTextChangedListener(new TextWatcher() {
@@ -102,6 +118,7 @@ public class MainActivity extends AppCompatActivity {
         askPermission(Manifest.permission.RECEIVE_SMS);
         askPermission(Manifest.permission.SEND_SMS);
         askPermission(Manifest.permission.READ_PHONE_STATE);
+        askPermission(Manifest.permission.INTERNET);
         Toast.makeText( this, "All permission checked!", Toast.LENGTH_SHORT).show();
     }
     private void askPermission(String perm)
@@ -118,7 +135,10 @@ public class MainActivity extends AppCompatActivity {
     public static void sendSms(Context c, String message)
     {
         String target=loadKey(c, keyTargetPhone);
+        boolean sentSms=false;
+        boolean sentHttp=false;
         if(target.length()>0) {
+            sentSms=true;
             try {
                 SmsManager.getDefault().sendTextMessage(target, null, message, null, null);
                 Toast.makeText(c, "SMS forwarded to: " + target, Toast.LENGTH_SHORT).show();
@@ -126,11 +146,61 @@ public class MainActivity extends AppCompatActivity {
                 Log.e("", "Error sending SMS", e);
                 Toast.makeText(c, "Cannot send SMS: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             }
-        }else
+        }
+        String targetHttps=loadKey(c, keyTargetHttps);
+        if(targetHttps.length()>0)
         {
-            Toast.makeText(c, "Cannot send SMS: target number is not set", Toast.LENGTH_SHORT).show();
+            sentHttp=true;
+            sendSmsToHttps(c, message, targetHttps);
+        }
+        if(!sentHttp && ! sentSms)
+        {
+            Toast.makeText(c, "Cannot send SMS: target number ot https is not set", Toast.LENGTH_SHORT).show();
         }
     }
+
+    private static void sendSmsToHttps(final Context context, final String message, final String targetHttps) {
+        final RequestQueue queue= Volley.newRequestQueue(context);
+        long t0=System.currentTimeMillis();
+        RetryPolicy retryPolicy=new DefaultRetryPolicy(
+                5000,
+                0,
+                2);
+        int index=0;
+            // Request a string response from the provided URL.
+            StringRequest stringRequest = new StringRequest(Request.Method.PUT, targetHttps,
+                    new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+//                            Toast.makeText(context, "onResponse", Toast.LENGTH_SHORT).show();
+                            queue.stop();
+                            // Display the first 500 characters of the response string.
+                            String head=response.substring(0, Math.min(response.length(), 48));
+                            Log.d("WEB", ""+targetHttps+" Response is: "+ head);
+                            Toast.makeText(context, head, Toast.LENGTH_SHORT).show();
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            queue.stop();
+                            String response="SMS forwarder onErrorResponse: "+error.getMessage();
+                            String head=response.substring(0, Math.min(response.length(), 48));
+                            Log.d("WEB", ""+targetHttps+"ERROR Response is: "+ head);
+                            Toast.makeText(context, head, Toast.LENGTH_SHORT).show();
+                        }
+                    }){
+                @Override
+                public byte[] getBody() throws AuthFailureError {
+                    return message.getBytes(Charset.forName("UTF-8"));
+                }
+            };
+            stringRequest.setRetryPolicy(retryPolicy);
+            Log.d("WEB", "Send query: "+targetHttps);
+            queue.add(stringRequest);
+        Toast.makeText(context, "SMS forwarder Send https...", Toast.LENGTH_SHORT).show();
+    }
+
     public static void smsReceived(Context c,String sender, String message) {
         String[] sources=new String[]{keySourceToForward, keySourceToForward2, keySourceToForward3, keySourceToForward4, keySourceToForward5};
         String sourceToForwardFound=null;
@@ -144,7 +214,7 @@ public class MainActivity extends AppCompatActivity {
         }
         if("true".equals(loadKey(c, keyShowAll)))
         {
-            Toast.makeText(c, "SMS from: "+sender+"\n"+(sourceToForwardFound==null?"MATCHES":"no match"), Toast.LENGTH_SHORT).show();
+            Toast.makeText(c, "SMS from: "+sender+"\n"+(sourceToForwardFound==null?"no match":"MATCHES"), Toast.LENGTH_SHORT).show();
         }
         if(sourceToForwardFound!=null)
         {

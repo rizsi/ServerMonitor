@@ -98,6 +98,14 @@
             android:hint="Target number"
             android:inputType="phone" />
 
+        <EditText
+            android:id="@+id/targetHttps"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="textPersonName"
+            android:text="Target https" />
+
         <CheckBox
             android:id="@+id/checkBoxShowAllSMSNumber"
             android:layout_width="match_parent"
