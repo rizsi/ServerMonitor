@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.provider.Telephony;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -29,6 +30,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.RetryPolicy;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
@@ -42,6 +44,11 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.net.CookieHandler;
+import java.net.CookieManager;
+import java.net.HttpCookie;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
@@ -54,7 +61,17 @@ public class MainActivity extends AppCompatActivity {
     public static final String keySourceToForward5="source5.txt";
     public static final String keyTargetHttps="targetHttps.txt";
     public static final String keyTargetPhone="target.txt";
+    public static final String keyTestMessage="testMessage.txt";
     public static final String keyShowAll="showall.txt";
+
+
+    /** Default charset for JSON request. */
+    protected static final String PROTOCOL_CHARSET = "utf-8";
+
+    /** Content type for request. */
+    private static final String PROTOCOL_CONTENT_TYPE =
+            String.format("text/plain; charset=%s", PROTOCOL_CHARSET);
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -76,6 +93,7 @@ public class MainActivity extends AppCompatActivity {
         initEditText(R.id.sourceToForward4, keySourceToForward4);
         initEditText(R.id.sourceToForward5, keySourceToForward5);
         initEditText(R.id.targetHttps, keyTargetHttps);
+        initEditText(R.id.testMessage, keyTestMessage);
         EditText targetPhone = (EditText)findViewById(R.id.targetPhone);
         targetPhone.setText(loadKey(this, keyTargetPhone));
         targetPhone.addTextChangedListener(new TextWatcher() {
@@ -129,7 +147,8 @@ public class MainActivity extends AppCompatActivity {
         }
     }
     public void onSendSMS(View v) {
-        sendSms(this, "Test message!");
+        String testMessage=loadKey(this, keyTestMessage);
+        sendSms(this, testMessage);
     }
 
     public static void sendSms(Context c, String message)
@@ -159,7 +178,32 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private static void configureCookie()
+    {
+    }
+
+    private static boolean initialized=false;
+
     private static void sendSmsToHttps(final Context context, final String message, final String targetHttps) {
+        if(!initialized)
+        {
+            initialized=true;
+
+            CookieManager manager = new CookieManager();
+            CookieHandler.setDefault( manager  );
+
+            // TODO cookie setup is hard coded
+            HttpCookie cookie = new HttpCookie("cookie-consent", "accepted");
+            cookie.setPath("/");
+            cookie.setVersion(0);
+            cookie.setDomain("rizsi.com");
+            try {
+                ((CookieManager)CookieHandler.getDefault()).getCookieStore().add(new URI("https://rizsi.com"), cookie);
+            } catch (URISyntaxException e) {
+                Toast.makeText(context, "Can not create cookie: "+e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        }
+
         final RequestQueue queue= Volley.newRequestQueue(context);
         long t0=System.currentTimeMillis();
         RetryPolicy retryPolicy=new DefaultRetryPolicy(
@@ -167,15 +211,16 @@ public class MainActivity extends AppCompatActivity {
                 0,
                 2);
         int index=0;
+        // JsonRequest
             // Request a string response from the provided URL.
-            StringRequest stringRequest = new StringRequest(Request.Method.PUT, targetHttps,
+            StringRequest stringRequest = new StringRequest(Request.Method.GET, targetHttps+"?msg="+ Uri.encode(message),
                     new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
 //                            Toast.makeText(context, "onResponse", Toast.LENGTH_SHORT).show();
                             queue.stop();
                             // Display the first 500 characters of the response string.
-                            String head=response.substring(0, Math.min(response.length(), 48));
+                            String head="SMS forwarder onResponse: "+response.substring(0, Math.min(response.length(), 48));
                             Log.d("WEB", ""+targetHttps+" Response is: "+ head);
                             Toast.makeText(context, head, Toast.LENGTH_SHORT).show();
                         }
@@ -190,10 +235,14 @@ public class MainActivity extends AppCompatActivity {
                             Toast.makeText(context, head, Toast.LENGTH_SHORT).show();
                         }
                     }){
-                @Override
+/*                @Override
                 public byte[] getBody() throws AuthFailureError {
-                    return message.getBytes(Charset.forName("UTF-8"));
+                    return message.getBytes(Charset.forName(PROTOCOL_CHARSET));
                 }
+                @Override
+                public String getBodyContentType() {
+                    return PROTOCOL_CONTENT_TYPE;
+                }*/
             };
             stringRequest.setRetryPolicy(retryPolicy);
             Log.d("WEB", "Send query: "+targetHttps);

@@ -106,6 +106,20 @@
             android:inputType="textPersonName"
             android:text="Target https" />
 
+        <TextView
+            android:id="@+id/textView4"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Test Message:" />
+
+        <EditText
+            android:id="@+id/testMessage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="textPersonName"
+            android:text="Test Message Example" />
+
         <CheckBox
             android:id="@+id/checkBoxShowAllSMSNumber"
             android:layout_width="match_parent"
